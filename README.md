@@ -1,125 +1,148 @@
-# Thermal Scout
+# Thermal Scout 🔥
 
-A thermal-aware Hugging Face model search and exploration CLI buddy that helps you find the right models while considering computational costs and energy efficiency.
+A thermal-aware Hugging Face model search and exploration tool with CLI and API interfaces.
 
 ## Features
 
-- **Smart Search**: Search Hugging Face Hub with thermal cost awareness
-- **Model Analysis**: Analyze models' characteristics and thermal footprint
-- **Comparison**: Compare multiple models side-by-side
-- **Recommendations**: Get model suggestions based on task and constraints
-- **Cache Management**: Manage your local Hugging Face model cache
-
-## Installation
-
-```bash
-# Clone the repository
-cd thermal-scout
-
-# Install with uv (recommended)
-uv sync
-
-# Or install with pip
-pip install -e .
-```
+- 🔍 **Smart Search**: Find AI models on Hugging Face Hub
+- 🌡️ **Thermal Awareness**: Models sorted by computational efficiency (Low/Medium/High)
+- 🚀 **Fast API**: RESTful API built with FastAPI
+- 💻 **CLI Interface**: Beautiful terminal UI with Rich
+- 📊 **Model Insights**: Downloads, likes, and task information
 
 ## Quick Start
 
-### Search for Models
+### Prerequisites
+
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) package manager
+
+### Installation
 
 ```bash
-# Basic search with thermal awareness
+# Clone the repository
+git clone <your-repo-url>
+cd thermal-scout
+
+# Install with uv
+uv sync
+
+# For development
+uv sync --extra dev
+```
+
+## Usage
+
+### 🖥️ CLI Interface
+
+```bash
+# Search with thermal awareness
 uv run thermal-scout search "sentiment analysis" --limit 5
 
-# Search for specific model types
-uv run thermal-scout search "text generation" --type text-generation --limit 10
+# Filter by model type
+uv run thermal-scout search "llama" --type text-generation
 
-# Search without thermal filtering
+# Disable thermal sorting
 uv run thermal-scout search "bert" --no-thermal
 ```
 
-### Analyze a Model
+### 🌐 API Server
+
+Start the API server:
 
 ```bash
-# Basic analysis
-uv run thermal-scout analyze "distilbert-base-uncased"
-
-# Include embedding analysis
-uv run thermal-scout analyze "sentence-transformers/all-MiniLM-L6-v2" --embeddings
+uv run python run_api.py
 ```
 
-### Compare Models
+The API will be available at:
+- Base URL: http://localhost:8080
+- Interactive Docs: http://localhost:8080/docs
+- ReDoc: http://localhost:8080/redoc
+
+#### API Examples
 
 ```bash
-# Compare multiple models
-uv run thermal-scout compare bert-base-uncased roberta-base distilbert-base-uncased
-```
+# Search for models
+curl "http://localhost:8080/api/v1/search?q=sentiment+analysis&limit=5"
 
-### Get Recommendations
+# Get model details
+curl "http://localhost:8080/api/v1/models/distilbert-base-uncased"
 
-```bash
-# Get recommendations for a task
-uv run thermal-scout recommend "text generation for creative writing"
-
-# With thermal constraints
-uv run thermal-scout recommend "question answering" --max-thermal medium
-
-# With size constraints
-uv run thermal-scout recommend "code generation" --max-size 7B
-```
-
-### Manage Cache
-
-```bash
-# View cache information
-uv run thermal-scout cache info
-
-# List cached models
-uv run thermal-scout cache list
-
-# Clear the cache
-uv run thermal-scout cache clear
+# Check health
+curl "http://localhost:8080/health"
 ```
 
 ## Thermal Cost Indicators
 
-- **Low**: Energy efficient models (< 10W typical)
-- **Medium**: Balanced performance (10-50W typical)
-- **High**: Performance-focused (50-150W typical)
-- **Very High**: Resource intensive (150W+ typical)
+Thermal Scout categorizes models based on their computational requirements:
 
-## Examples
+| Indicator | Thermal Cost | Description | Examples |
+|-----------|--------------|-------------|----------|
+| 🟢 | Low | <1B parameters, efficient models | DistilBERT, TinyBERT |
+| 🟡 | Medium | 1-3B parameters, moderate size | BERT-base, RoBERTa-base |
+| 🔴 | High | >3B parameters, large models | GPT-3, LLaMA-7B |
 
-Run the quick start examples:
+## Documentation
 
-```bash
-python examples/quick_start.py
-```
+- 📖 [API Reference](docs/API.md) - Complete API documentation
+- 🛠️ [Local Development](docs/LOCAL_DEVELOPMENT.md) - Development setup guide
+- 🧪 [API Testing Guide](docs/API_TESTING.md) - Testing strategies and tools
 
 ## Development
 
-The project uses UV for dependency management:
+### Running Tests
 
 ```bash
-# Add a new dependency
-uv add package-name
+# Run all tests
+uv run pytest
 
-# Update dependencies
-uv sync
+# Run with coverage
+uv run pytest --cov=thermal_scout
 
-# Run in development
-uv run thermal-scout --help
+# Run specific tests
+uv run pytest tests/test_api.py -v
 ```
 
-## Architecture
+### Code Quality
 
-- `thermal_scout/cli.py` - Main CLI interface using Typer
-- `thermal_scout/search.py` - Thermal-aware model search
-- `thermal_scout/analyzer.py` - Model analysis and footprint estimation
-- `thermal_scout/compare.py` - Model comparison functionality
-- `thermal_scout/recommend.py` - Task-based recommendations
-- `thermal_scout/cache.py` - Cache management utilities
+```bash
+# Lint and format
+uv run ruff check --fix .
+uv run ruff format .
+
+# Type checking
+uv run mypy thermal_scout/
+```
+
+### Pre-commit Hooks
+
+```bash
+# Install hooks
+uv run pre-commit install
+
+# Run manually
+uv run pre-commit run --all-files
+```
 
 ## Contributing
 
-Feel free to open issues or submit pull requests to improve thermal awareness and model discovery!
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Run tests and linting
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
+
+- 🚀 Built with [FastAPI](https://fastapi.tiangolo.com/) and [Typer](https://typer.tiangolo.com/)
+- 🤗 Powered by [Hugging Face Hub](https://huggingface.co/)
+- 🎨 Beautiful CLI with [Rich](https://rich.readthedocs.io/)
+
+---
+
+Made with ❤️ by Claude and Tyler for sustainable AI

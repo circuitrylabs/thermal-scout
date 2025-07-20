@@ -8,7 +8,7 @@ __email__ = "tyler.chrestoff@hey.com"
 
 # Package metadata only - no imports to avoid circular dependencies
 __all__ = [
-    "__version__",
     "__author__",
     "__email__",
+    "__version__",
 ]

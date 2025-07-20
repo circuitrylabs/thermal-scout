@@ -1,11 +1,6 @@
 const ThermalScout = (() => {
     const state = {
-        apiKey: localStorage.getItem('hf_api_key'),
-        models: [],
-        filters: {
-            thermal: 'all',
-            openOnly: true
-        }
+        models: []
     };
 
     const API_BASE = 'https://huggingface.co/api/models';
@@ -16,16 +11,12 @@ const ThermalScout = (() => {
         resultsContainer: null,
         resultsCount: null,
         loading: null,
-        error: null,
-        apiForm: null,
-        apiKeyInput: null,
-        clearDataBtn: null
+        error: null
     };
 
     function init() {
         cacheElements();
         bindEvents();
-        checkApiKey();
     }
 
     function cacheElements() {
@@ -35,36 +26,16 @@ const ThermalScout = (() => {
         elements.resultsCount = document.getElementById('results-count');
         elements.loading = document.getElementById('loading');
         elements.error = document.getElementById('error');
-        elements.apiForm = document.getElementById('api-form');
-        elements.apiKeyInput = document.getElementById('api-key-input');
-        elements.clearDataBtn = document.getElementById('clear-data');
     }
 
     function bindEvents() {
         elements.searchForm.addEventListener('submit', handleSearch);
-        elements.apiForm.addEventListener('submit', handleApiKeySave);
-        elements.clearDataBtn.addEventListener('click', handleClearData);
-
-        document.querySelectorAll('input[name="thermal"]').forEach(input => {
-            input.addEventListener('change', handleFilterChange);
-        });
-
-        document.querySelector('input[name="license"]').addEventListener('change', handleFilterChange);
     }
 
-    function checkApiKey() {
-        if (!state.apiKey) {
-            showMessage('Please add your HuggingFace API key below to search models');
-        }
-    }
 
     async function handleSearch(e) {
         e.preventDefault();
         
-        if (!state.apiKey) {
-            showError('API key required. Please add it below.');
-            return;
-        }
 
         const query = elements.searchInput.value.trim();
         if (!query) return;
@@ -90,59 +61,40 @@ const ThermalScout = (() => {
             full: 'true'
         });
 
-        if (state.filters.openOnly) {
-            params.append('filter', 'license:apache-2.0,license:mit,license:openrail');
-        }
 
-        const response = await fetch(`${API_BASE}?${params}`, {
-            headers: {
-                'Authorization': `Bearer ${state.apiKey}`
-            }
-        });
+        const response = await fetch(`${API_BASE}?${params}`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        return filterByThermal(data);
+        return data;
     }
 
-    function filterByThermal(models) {
-        if (state.filters.thermal === 'all') return models;
-
-        return models.filter(model => {
-            const params = getModelParameters(model);
-            const thermal = getThermalCategory(params);
-            return thermal === state.filters.thermal;
-        });
-    }
 
     function getModelParameters(model) {
+        // Try to get parameters from various sources
         if (model.safetensors?.parameters?.total) {
             return model.safetensors.parameters.total;
         }
         
-        const match = model.modelId?.match(/(\d+)B/i);
+        // Try to extract from model ID (e.g., "7B" in name)
+        const match = model.id?.match(/(\d+\.?\d*)B/i) || model.modelId?.match(/(\d+\.?\d*)B/i);
         if (match) {
             return parseFloat(match[1]) * 1e9;
         }
         
+        // Default to unknown
         return 0;
     }
 
-    function getThermalCategory(parameters) {
-        if (parameters < 1e9) return 'cool';
-        if (parameters < 3e9) return 'warm';
-        if (parameters < 7e9) return 'moderate';
-        return 'hot';
-    }
 
     function getThermalIndicator(parameters) {
-        if (parameters < 1e9) return '·';
-        if (parameters < 3e9) return '🔥';
-        if (parameters < 7e9) return '🔥🔥';
-        return '🔥🔥🔥';
+        if (parameters < 1e9) return 'Cool';
+        if (parameters < 3e9) return 'Warm';
+        if (parameters < 7e9) return 'Moderate';
+        return 'Hot';
     }
 
     function displayResults(models) {
@@ -169,20 +121,22 @@ const ThermalScout = (() => {
         const thermalClass = getThermalClass(params);
         const size = formatSize(params);
 
+        const modelId = model.id || model.modelId;
+        const downloads = model.downloads || 0;
+        const likes = model.likes || 0;
+        
         card.innerHTML = `
-            <h3>${model.modelId}</h3>
-            <p>${model.pipeline_tag || 'Unknown task'}</p>
-            <p>
-                <span class="thermal-indicator ${thermalClass}">${thermal}</span>
-                <span>${size}</span>
-            </p>
-            <p>
-                <a href="https://huggingface.co/${model.modelId}" 
-                   target="_blank" 
-                   rel="noopener noreferrer">
-                    View on HuggingFace →
-                </a>
-            </p>
+            <a href="https://huggingface.co/${modelId}" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               class="model-name-link">
+                <h3 class="model-name">${modelId}</h3>
+            </a>
+            <p class="model-task">${model.pipeline_tag || 'General'}</p>
+            <div class="model-stats">
+                <span class="thermal-indicator ${thermalClass}">${thermal} ${size}</span>
+                <span class="model-popularity">↓ ${formatNumber(downloads)} · ♥ ${likes}</span>
+            </div>
         `;
 
         return card;
@@ -196,56 +150,18 @@ const ThermalScout = (() => {
     }
 
     function formatSize(parameters) {
-        if (parameters === 0) return 'Size unknown';
-        if (parameters < 1e9) return `${Math.round(parameters / 1e6)}M parameters`;
-        return `${(parameters / 1e9).toFixed(1)}B parameters`;
+        if (parameters === 0) return '';
+        if (parameters < 1e9) return `(${Math.round(parameters / 1e6)}M)`;
+        return `(${(parameters / 1e9).toFixed(1)}B)`;
+    }
+    
+    function formatNumber(num) {
+        if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
+        if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`;
+        return num.toString();
     }
 
-    function handleFilterChange() {
-        const thermalFilter = document.querySelector('input[name="thermal"]:checked');
-        const licenseFilter = document.querySelector('input[name="license"]');
 
-        state.filters.thermal = thermalFilter.value;
-        state.filters.openOnly = licenseFilter.checked;
-
-        if (elements.resultsContainer.children.length > 0) {
-            elements.searchForm.dispatchEvent(new Event('submit'));
-        }
-    }
-
-    function handleApiKeySave(e) {
-        e.preventDefault();
-
-        const consent = e.target.consent.checked;
-        if (!consent) {
-            showError('Consent required to store API key');
-            return;
-        }
-
-        const apiKey = elements.apiKeyInput.value.trim();
-        if (!apiKey.startsWith('hf_')) {
-            showError('Invalid API key format');
-            return;
-        }
-
-        localStorage.setItem('hf_api_key', apiKey);
-        state.apiKey = apiKey;
-        
-        elements.apiKeyInput.value = '';
-        e.target.consent.checked = false;
-        
-        showMessage('API key saved successfully!');
-    }
-
-    function handleClearData() {
-        if (confirm('Clear all stored data including your API key?')) {
-            localStorage.clear();
-            state.apiKey = null;
-            elements.resultsContainer.innerHTML = '';
-            elements.resultsCount.textContent = 'Ready to search';
-            showMessage('All data cleared');
-        }
-    }
 
     function showLoading() {
         elements.loading.hidden = false;
@@ -266,9 +182,7 @@ const ThermalScout = (() => {
         elements.error.hidden = true;
     }
 
-    function showMessage(message) {
-        elements.resultsCount.textContent = message;
-    }
+
 
     return {
         init

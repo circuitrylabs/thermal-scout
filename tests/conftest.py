@@ -2,9 +2,9 @@
 Shared pytest fixtures and configuration for thermal-scout tests
 """
 
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
-from typing import Dict, Any, List
 
 
 @pytest.fixture
@@ -27,8 +27,8 @@ def sample_model_info():
         "library_name": "transformers",
         "siblings": [
             {"rfilename": "pytorch_model.bin", "size": 250_000_000},
-            {"rfilename": "config.json", "size": 1000}
-        ]
+            {"rfilename": "config.json", "size": 1000},
+        ],
     }
 
 
@@ -42,7 +42,7 @@ def sample_model_list():
             likes=200,
             tags=["transformers", "pytorch", "tiny"],
             pipeline_tag="text-classification",
-            library_name="transformers"
+            library_name="transformers",
         ),
         Mock(
             modelId="bert-large-uncased",
@@ -50,7 +50,7 @@ def sample_model_list():
             likes=1000,
             tags=["transformers", "pytorch", "bert", "large"],
             pipeline_tag="fill-mask",
-            library_name="transformers"
+            library_name="transformers",
         ),
         Mock(
             modelId="distilbert-base-uncased",
@@ -58,8 +58,8 @@ def sample_model_list():
             likes=500,
             tags=["transformers", "pytorch", "bert", "distilled"],
             pipeline_tag="text-classification",
-            library_name="transformers"
-        )
+            library_name="transformers",
+        ),
     ]
 
 
@@ -71,7 +71,7 @@ def mock_cache_info():
     mock_info.cache_dir = "/home/user/.cache/huggingface"
     mock_info.repos = [
         Mock(repo_id="bert-base-uncased", size_on_disk=500_000_000),
-        Mock(repo_id="gpt2", size_on_disk=500_000_000)
+        Mock(repo_id="gpt2", size_on_disk=500_000_000),
     ]
     mock_info.warnings = []
     return mock_info
