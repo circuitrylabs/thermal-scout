@@ -13,7 +13,7 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?style=for-the-badge)](https://github.com/astral-sh/ruff)
 [![Powered by uv](https://img.shields.io/badge/powered%20by-uv-orange.svg?style=for-the-badge)](https://github.com/astral-sh/uv)
 
-[**Web Demo**](https://thermal-scout.circuitrylabs.com) • [**Documentation**](docs/) • [**API Reference**](docs/API.md) • [**Contributing**](CONTRIBUTING.md)
+[**Web Demo**](https://thermal.circuitrylabs.org) • [**Documentation**](docs/) • [**API Reference**](docs/API.md) • [**Contributing**](CONTRIBUTING.md)
 
 </div>
 
