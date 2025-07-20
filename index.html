@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Scout | CircuitryLabs Model Explorer</title>
+    <meta name="description" content="Find AI models with thermal cost awareness. A minimal, consent-first model explorer.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://huggingface.co">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <pre class="ascii-fire" id="fire-frame-1">
+                )  )   )
+              ( /(  ( /(  ( /(
+              )\()) )\()) )\())
+             ((_)\ ((_)\ ((_)\
+              _((_) _((_) _((_)
+             | || || || || || |
+             | __ || __ || __ |
+             |_||_||_||_||_||_|
+            </pre>
+            <pre class="ascii-fire" id="fire-frame-2" hidden>
+               (  (    (
+              ))\  ))\  ))\
+             /((_)/((_)/((_)
+            (_)) (_)) (_))
+            | |  | |  | |
+            |_|  |_|  |_|
+            </pre>
+            <h1 class="splash-title">THERMAL SCOUT</h1>
+            <p class="splash-tagline">heat → light → insight</p>
+            <button class="enter-button" id="enter-app">[ ENTER ]</button>
+        </div>
+    </div>
+
+    <!-- Main App (hidden initially) -->
+    <div id="main-app" class="main-app" hidden>
+        <header class="site-header">
+            <h1 class="site-title">THERMAL SCOUT</h1>
+            <p class="site-tagline">Model Explorer by CircuitryLabs</p>
+            <a href="#main-content" class="skip-link">Skip to main content</a>
+        </header>
+        
+        <main id="main-content">
+        <section class="search-section" aria-labelledby="search-heading">
+            <h1 id="search-heading" class="visually-hidden">Search AI Models</h1>
+            
+            <form class="search-form" id="search-form" role="search">
+                <label for="search-input" class="visually-hidden">Search for AI models</label>
+                <input 
+                    type="search" 
+                    id="search-input"
+                    name="query"
+                    placeholder="Search models... (e.g., 'llama', 'gpt2')"
+                    required
+                    aria-describedby="search-help"
+                    class="search-input"
+                >
+                <small id="search-help" class="help-text">
+                    Press Enter to search. Use filters below to refine.
+                </small>
+                <button type="submit" class="search-button">
+                    Search
+                </button>
+            </form>
+            
+            <div class="filters" role="group" aria-labelledby="filters-heading">
+                <h2 id="filters-heading" class="filters-heading">Filters</h2>
+                
+                <fieldset class="filter-group">
+                    <legend>Thermal Range</legend>
+                    <label class="filter-option">
+                        <input type="radio" name="thermal" value="all" checked>
+                        <span>All Models</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="thermal" value="cool">
+                        <span>· Cool (&lt;1B)</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="thermal" value="warm">
+                        <span>🔥 Warm (1-3B)</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="thermal" value="moderate">
+                        <span>🔥🔥 Moderate (3-7B)</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="thermal" value="hot">
+                        <span>🔥🔥🔥 Hot (7B+)</span>
+                    </label>
+                </fieldset>
+                
+                <fieldset class="filter-group">
+                    <legend>License Type</legend>
+                    <label class="filter-option">
+                        <input type="checkbox" name="license" value="open" checked>
+                        <span>Open Source Only</span>
+                    </label>
+                </fieldset>
+            </div>
+        </section>
+        
+        <section class="results-section" aria-labelledby="results-heading" aria-live="polite">
+            <h2 id="results-heading" class="results-heading">
+                <span id="results-count">Ready to search</span>
+            </h2>
+            
+            <div id="results-container" class="results-container">
+            </div>
+            
+            <div id="loading" class="loading" hidden>
+                <p>Searching models...</p>
+            </div>
+            
+            <div id="error" class="error-message" hidden role="alert">
+                <p>Something went wrong. Please try again.</p>
+            </div>
+        </section>
+        
+        <section class="api-section" aria-labelledby="api-heading">
+            <h2 id="api-heading">API Configuration</h2>
+            
+            <details class="api-details">
+                <summary>HuggingFace API Key (Required)</summary>
+                
+                <div class="api-content">
+                    <p class="api-info">
+                        Thermal Scout requires a HuggingFace API key to search models.
+                        Your key is stored locally and never sent to our servers.
+                    </p>
+                    
+                    <form id="api-form" class="api-form">
+                        <label for="api-key-input">
+                            API Key
+                            <a href="https://huggingface.co/settings/tokens" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               class="help-link">
+                                Get a key
+                            </a>
+                        </label>
+                        <input 
+                            type="password" 
+                            id="api-key-input"
+                            name="apiKey"
+                            placeholder="hf_..."
+                            required
+                            pattern="hf_[a-zA-Z0-9]+"
+                            aria-describedby="api-key-help"
+                        >
+                        <small id="api-key-help" class="help-text">
+                            Keys start with "hf_" and are kept private
+                        </small>
+                        
+                        <label class="consent-label">
+                            <input 
+                                type="checkbox" 
+                                name="consent" 
+                                required
+                                aria-describedby="consent-help"
+                            >
+                            I consent to store this key locally
+                        </label>
+                        <small id="consent-help" class="help-text">
+                            You can clear stored data anytime below
+                        </small>
+                        
+                        <button type="submit" class="save-button">
+                            Save API Key
+                        </button>
+                    </form>
+                    
+                    <div class="data-controls">
+                        <button type="button" id="clear-data" class="clear-button">
+                            Clear All Stored Data
+                        </button>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </main>
+    
+        <footer class="site-footer">
+            <p>
+                <small>
+                    Thermal Scout by <a href="https://circuitrylabs.com">CircuitryLabs</a> | 
+                    <a href="https://github.com/circuitrylabs/thermal-scout">Source Code</a> | 
+                    No tracking, no cookies, just models
+                </small>
+            </p>
+        </footer>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
