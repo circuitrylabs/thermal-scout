@@ -1,0 +1,33 @@
+# Netlify Configuration for Thermal Scout
+
+[build]
+  # No build command needed - static site
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# Redirect API calls to your backend
+# Option 1: If you deploy the API separately (e.g., on Render, Railway, or Fly.io)
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://your-api-domain.com/api/:splat"
+#   status = 200
+#   force = true
+
+# Option 2: For now, use the HuggingFace API directly from frontend
+# No redirect needed - app.js already calls HuggingFace directly

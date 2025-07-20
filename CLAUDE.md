@@ -1,252 +1,216 @@
 # CLAUDE.md - Thermal Scout
 
-This file provides guidance to Claude Code when developing the Thermal Scout project - a minimal web app for finding AI models with thermal cost awareness.
+Project guidance for Claude Code when developing Thermal Scout.
 
 ## Project Overview
 
-**Thermal Scout** is a CircuitryLabs Model Explorer that helps users find AI models on HuggingFace while being conscious of computational thermal costs. Built with vanilla HTML/CSS/JS, it emphasizes consent, minimalism, and thermal awareness.
+Thermal Scout is a minimal AI model search tool with thermal cost awareness. It provides three interfaces:
 
-### Core Principles
-- **Thermal Awareness**: Show computational cost through visual indicators
-- **Consent-First**: Explicit user consent for all data operations
-- **Minimalist Design**: ASCII-inspired, monospace aesthetic
-- **No Dependencies**: Vanilla stack for v1
+1. **Web UI** - Clean, light-mode interface (vanilla HTML/CSS/JS)
+2. **CLI** - Command-line tool built with Typer
+3. **API** - REST API built with FastAPI
 
-## Quick Start Commands
+## Quick Commands
 
 ```bash
-# Development setup (no build needed for v1!)
-cd thermal-scout
+# Development
+uv sync                    # Install dependencies
+uv run pytest             # Run tests
+uv run ruff format .      # Format code
+uv run ruff check .       # Lint
+uv run ty                 # Type check
 
-# Start local server
-python -m http.server 8000
-# or
-npx serve .
-
-# Open in browser
-open http://localhost:8000
+# Run services
+python -m http.server 8000              # Web UI
+uv run python -m thermal_scout.cli      # CLI
+uv run python run_api.py                # API server
 ```
 
-## Architecture Overview
+## Architecture
 
-### Stack (v1)
-- **HTML5**: Semantic, accessible markup
-- **CSS3**: Custom properties, Grid/Flexbox, ASCII borders
-- **Vanilla JS**: ES6+, Fetch API, localStorage
-- **No Build Tools**: Direct browser execution
-- **API**: HuggingFace Models API
+### Stack
+- **Python 3.12+** with type hints
+- **uv** - Package management
+- **ruff** - Linting/formatting
+- **ty** - Type checking
+- **Typer** - CLI framework
+- **FastAPI** - API framework
+- **Vanilla HTML/CSS/JS** - No build tools
 
-### File Structure
+### Project Structure
 ```
 thermal-scout/
-├── index.html          # Single page app
-├── styles.css          # All styling
-├── app.js             # Core application logic
-├── CLAUDE.md          # This file
-├── docs/
-│   ├── model-explorer-spec.md    # Original spec
-│   └── META-DEVELOPMENT-FLOW.md  # Development guide
-└── README.md          # User documentation
+├── index.html              # Single-page web app
+├── app.js                 # Frontend logic
+├── styles.css             # Light-mode only styling
+├── thermal_scout/         # Python package
+│   ├── __init__.py       # Package exports
+│   ├── cli.py           # Typer CLI
+│   ├── search.py        # Core search logic
+│   └── api/             # FastAPI app
+│       ├── __init__.py
+│       └── main.py      # API endpoints
+├── tests/               # Test suite
+│   ├── conftest.py     # Test fixtures
+│   ├── test_search.py  # Core tests
+│   ├── test_cli.py     # CLI tests
+│   └── test_api.py     # API tests
+├── pyproject.toml      # Project config
+└── docs/              # Documentation
 ```
 
 ## Development Guidelines
 
-### 1. HTML Structure
-```html
-<!-- Follow semantic HTML5 patterns -->
-<main class="container">
-    <header class="ascii-border">
-        <h1 class="text-mono">Thermal Scout</h1>
-    </header>
-    <section class="search-panel">
-        <!-- Components here -->
-    </section>
-</main>
+### Python Code Style
+
+```python
+# Use type hints everywhere
+def search_models(query: str, limit: int = 20) -> list[dict[str, Any]]:
+    """Search HuggingFace models with thermal awareness."""
+    ...
+
+# Keep functions focused and testable
+def get_thermal_indicator(parameters: int) -> str:
+    if parameters < 1e9:
+        return "Cool"
+    ...
 ```
 
-### 2. CSS Patterns
-```css
-/* Use CSS custom properties for theming */
-:root {
-    --color-bg: #000000;
-    --color-text: #FFFFFF;
-    --color-accent: #00FFFF;
-    --font-mono: 'Courier New', Courier, monospace;
-    --border-char: '═';
-}
+### Frontend Guidelines
 
-/* ASCII border utility */
-.ascii-border {
-    border: 1px solid var(--color-text);
-    position: relative;
-}
-```
-
-### 3. JavaScript Architecture
 ```javascript
-// Use module pattern for organization
+// Module pattern for organization
 const ThermalScout = (() => {
-    // Private state
     const state = {
-        apiKey: null,
-        models: [],
-        filters: {}
+        models: []
     };
     
-    // Public API
-    return {
-        init,
-        search,
-        updateFilters
-    };
+    function init() {
+        // Initialize app
+    }
+    
+    return { init };
 })();
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', ThermalScout.init);
+// No external dependencies
+// Light mode only - no dark theme
 ```
 
-### 4. Thermal Indicators
-```javascript
-// Model size to thermal mapping
-function getThermalIndicator(parameters) {
-    if (parameters < 1e9) return '·';        // <1B: cool
-    if (parameters < 3e9) return '🔥';      // 1-3B: warm
-    if (parameters < 7e9) return '🔥🔥';    // 3-7B: moderate
-    return '🔥🔥🔥';                        // 7B+: hot
-}
+### API Design
+
+```python
+# FastAPI with clear types
+@app.get("/api/v1/search")
+async def search(
+    q: str,
+    limit: int = 20,
+    thermal: str | None = None
+) -> SearchResponse:
+    """Search models with optional thermal filtering."""
+    ...
 ```
 
-### 5. API Integration
-```javascript
-// HuggingFace API wrapper
-async function fetchModels(query, filters) {
-    const endpoint = 'https://huggingface.co/api/models';
-    const params = new URLSearchParams({
-        search: query,
-        filter: filters.license || 'apache-2.0',
-        limit: 20
-    });
-    
-    return fetch(`${endpoint}?${params}`, {
-        headers: {
-            'Authorization': `Bearer ${getApiKey()}`
-        }
-    });
-}
+## Thermal Cost Algorithm
+
+Models are categorized by parameter count:
+
+- **Cool** 🟢: <1B parameters
+- **Warm** 🟡: 1-3B parameters  
+- **Moderate** 🟠: 3-7B parameters
+- **Hot** 🔴: 7B+ parameters
+
+## Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run specific test
+uv run pytest tests/test_search.py::test_thermal_indicator
+
+# With coverage
+uv run pytest --cov=thermal_scout --cov-report=html
 ```
-
-### 6. Consent Patterns
-```javascript
-// Always ask before storing
-function requestConsent(action) {
-    const modal = document.createElement('div');
-    modal.className = 'consent-modal ascii-border';
-    modal.innerHTML = `
-        <h2>Consent Required</h2>
-        <p>${action}</p>
-        <button data-consent="accept">Accept</button>
-        <button data-consent="decline">Decline</button>
-    `;
-    document.body.appendChild(modal);
-}
-```
-
-## Visual Design Specifications
-
-### Color Palette
-- Background: `#000000` (black)
-- Text: `#FFFFFF` (white)  
-- Accent: `#00FFFF` (cyan)
-- Error: `#FF0000` (red)
-
-### Typography
-- Primary: `'Courier New', Courier, monospace`
-- Base size: `16px`
-- Line height: `1.5`
-
-### ASCII Border Characters
-```
-╔══════════════╗
-║ Box Drawing  ║
-╚══════════════╝
-
-┌──────────────┐
-│ Light Style  │
-└──────────────┘
-```
-
-## Testing & Validation
-
-### Manual Testing Checklist
-- [ ] API key consent flow works
-- [ ] Search returns results
-- [ ] Thermal indicators display correctly
-- [ ] Filters apply properly
-- [ ] Responsive on mobile
-- [ ] Keyboard navigation works
-- [ ] Screen reader friendly
-
-### Performance Targets
-- First paint: <1s
-- Interactive: <2s
-- API response: <3s
-- No external fonts or heavy assets
 
 ## Common Tasks
 
 ### Add a New Feature
-1. Check the spec in `docs/model-explorer-spec.md`
-2. Follow existing patterns in codebase
-3. Maintain vanilla JS approach
-4. Test manually in browser
-5. Ensure mobile responsive
 
-### Debug API Issues
-```javascript
-// Enable debug logging
-localStorage.setItem('debug', 'true');
+1. Write tests first in `tests/`
+2. Implement in appropriate module
+3. Update documentation
+4. Run full test suite
+5. Format and lint code
 
-// Check API key
-console.log('API Key present:', !!localStorage.getItem('hf_api_key'));
+### Update Dependencies
 
-// Test API directly
-fetch('https://huggingface.co/api/models?limit=1')
-    .then(r => r.json())
-    .then(console.log);
-```
-
-### Deploy to GitHub Pages
 ```bash
-# Ensure index.html is in root
-git add .
-git commit -m "Deploy Thermal Scout"
-git push origin main
+# Add a dependency
+uv add package-name
 
-# Enable GitHub Pages in settings
-# Visit: https://[username].github.io/thermal-scout
+# Add dev dependency
+uv add --dev package-name
+
+# Update all
+uv sync
 ```
 
-## Privacy & Security
+### Debug Issues
 
-1. **No tracking**: Zero analytics or third-party scripts
-2. **Local storage only**: API keys never leave device
-3. **Explicit consent**: Every data operation requires permission
-4. **Clear data option**: User can wipe all stored data
-5. **No cookies**: No tracking mechanisms
+```python
+# Enable debug logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
-## Future Enhancements (v2+)
+# Check API responses
+curl http://localhost:8080/api/v1/search?q=llama
+```
 
-- Model comparison view
-- Export search results
-- Advanced filters (quantization, tasks)
-- Thermal cost calculator
-- Carbon footprint estimates
-- PWA capabilities
+## Important Notes
 
-## Resources
+1. **No API keys required** - Direct HuggingFace Hub access
+2. **Light mode only** - No dark theme support
+3. **Minimal dependencies** - Keep it simple
+4. **Type safety** - Use type hints everywhere
+5. **Test coverage** - Maintain >95% coverage
 
-- [HuggingFace API Docs](https://huggingface.co/docs/api-inference/index)
-- [MDN Web Docs](https://developer.mozilla.org/)
-- [CircuitryLabs Design System](https://circuitrylabs.com/design)
+## Code Patterns to Follow
 
-Remember: Keep it minimal, respect user consent, and always show thermal costs!
+### Error Handling
+```python
+try:
+    result = search_models(query)
+except Exception as e:
+    logger.error(f"Search failed: {e}")
+    raise HTTPException(status_code=500, detail="Search failed")
+```
+
+### Async Operations
+```python
+async def fetch_models(query: str) -> list[dict]:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(...)
+        return response.json()
+```
+
+### CLI Commands
+```python
+@app.command()
+def search(
+    query: str = typer.Argument(..., help="Search query"),
+    limit: int = typer.Option(20, help="Number of results")
+):
+    """Search for models."""
+    results = thermal_search(query, limit)
+    display_results(results)
+```
+
+## Deployment
+
+The app is designed to be deployment-ready:
+
+- Static files can be served from any web server
+- API can run on any ASGI server (uvicorn, gunicorn)
+- CLI works as a standalone tool
+
+Remember: Keep it simple, fast, and thermal-aware!

@@ -1,0 +1,5 @@
+# Netlify Redirects
+# Currently no redirects needed - app uses HuggingFace API directly
+
+# Future: If you deploy a Python API backend, uncomment and update:
+# /api/*  https://your-thermal-scout-api.herokuapp.com/api/:splat  200

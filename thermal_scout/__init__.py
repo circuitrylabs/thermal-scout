@@ -1,5 +1,12 @@
 """
-Thermal Scout - A thermal-aware Hugging Face model search and exploration CLI
+╔╦╗╦ ╦╔═╗╦═╗╔╦╗╔═╗╦    ╔═╗╔═╗╔═╗╦ ╦╔╦╗
+ ║ ╠═╣║╣ ╠╦╝║║║╠═╣║    ╚═╗║  ║ ║║ ║ ║ 
+ ╩ ╩ ╩╚═╝╩╚═╩ ╩╩ ╩╩═╝  ╚═╝╚═╝╚═╝╚═╝ ╩ 
+
+🔥 A thermal-aware HuggingFace model search tool 🔥
+
+Find AI models based on their computational "thermal" cost.
+Choose models that match your computational resources!
 """
 
 __version__ = "0.1.0"

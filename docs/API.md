@@ -1,6 +1,8 @@
 # Thermal Scout API Reference
 
-A thermal-aware Hugging Face model search API built with FastAPI.
+## Overview
+
+Thermal Scout provides a REST API for searching AI models with thermal cost awareness. The API is built with FastAPI and follows RESTful principles.
 
 ## Base URL
 
@@ -10,223 +12,235 @@ http://localhost:8080
 
 ## Authentication
 
-Currently, the API is open and does not require authentication. Future versions may add API key support for rate limiting.
+No authentication required. The API directly accesses HuggingFace Hub without API keys.
 
 ## Endpoints
 
 ### Health Check
 
-Check if the API is running and healthy.
-
 ```http
 GET /health
 ```
 
-#### Response
+Returns API health status.
 
+**Response**
 ```json
 {
   "status": "healthy",
-  "version": "0.1.0",
-  "thermal_aware": true
+  "version": "0.1.0"
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| status | string | Service health status |
-| version | string | API version |
-| thermal_aware | boolean | Whether thermal awareness is enabled |
-
----
-
 ### Search Models
-
-Search for models on Hugging Face Hub with thermal-aware sorting.
 
 ```http
 GET /api/v1/search
 ```
 
-#### Query Parameters
+Search for models on HuggingFace Hub with thermal awareness.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| q | string | Yes | - | Search query for models |
-| limit | integer | No | 10 | Number of results (1-100) |
-| model_type | string | No | null | Filter by model type/task |
-| thermal_aware | boolean | No | true | Enable thermal-aware sorting |
+**Query Parameters**
 
-#### Example Requests
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| q | string | required | Search query |
+| limit | integer | 20 | Number of results (1-100) |
+| thermal | string | null | Filter by thermal level: cool, warm, moderate, hot |
+| sort_by | string | relevance | Sort by: relevance, downloads, likes, thermal |
 
+**Example Request**
 ```bash
-# Basic search
-curl "http://localhost:8080/api/v1/search?q=sentiment+analysis"
-
-# Search with limit
-curl "http://localhost:8080/api/v1/search?q=bert&limit=5"
-
-# Filter by model type
-curl "http://localhost:8080/api/v1/search?q=llama&model_type=text-generation"
-
-# Disable thermal sorting
-curl "http://localhost:8080/api/v1/search?q=gpt&thermal_aware=false"
+curl "http://localhost:8080/api/v1/search?q=llama&limit=10&thermal=cool"
 ```
 
-#### Response
-
+**Response**
 ```json
 {
-  "models": [
+  "query": "llama",
+  "total": 150,
+  "results": [
     {
-      "modelId": "distilbert-base-uncased",
-      "downloads": 1000000,
-      "likes": 500,
-      "tags": ["transformers", "pytorch", "bert", "distilled"],
-      "pipeline_tag": "text-classification",
-      "library_name": "transformers",
-      "thermal_cost": "Low"
+      "id": "meta-llama/Llama-2-7b",
+      "task": "text-generation",
+      "parameters": 7000000000,
+      "thermal": {
+        "level": "hot",
+        "indicator": "🔴",
+        "power_estimate": "150W+"
+      },
+      "downloads": 1234567,
+      "likes": 890,
+      "url": "https://huggingface.co/meta-llama/Llama-2-7b"
     }
-  ],
-  "query": "sentiment analysis",
-  "limit": 10,
-  "thermal_aware": true
+  ]
 }
 ```
 
-#### Model Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| modelId | string | Unique model identifier |
-| downloads | integer | Number of downloads |
-| likes | integer | Number of likes |
-| tags | array[string] | Model tags |
-| pipeline_tag | string/null | Model task type |
-| library_name | string/null | ML library used |
-| thermal_cost | string | Thermal efficiency: "Low", "Medium", or "High" |
-
----
-
 ### Get Model Details
-
-Get detailed information about a specific model.
 
 ```http
 GET /api/v1/models/{model_id}
 ```
 
-#### Path Parameters
+Get detailed information about a specific model.
+
+**Path Parameters**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| model_id | string | The model ID (e.g., bert-base-uncased) |
+| model_id | string | Model ID (e.g., "meta-llama/Llama-2-7b") |
 
-#### Example Request
-
+**Example Request**
 ```bash
-curl "http://localhost:8080/api/v1/models/distilbert-base-uncased"
+curl "http://localhost:8080/api/v1/models/meta-llama/Llama-2-7b"
 ```
 
-#### Response
-
+**Response**
 ```json
 {
-  "modelId": "distilbert-base-uncased",
-  "thermal_cost": "Low",
-  "downloads": 1000000,
-  "likes": 500,
-  "tags": ["transformers", "pytorch", "bert", "distilled"],
-  "pipeline_tag": "text-classification",
-  "library_name": "transformers",
-  "description": null
+  "id": "meta-llama/Llama-2-7b",
+  "task": "text-generation",
+  "parameters": 7000000000,
+  "thermal": {
+    "level": "hot",
+    "indicator": "🔴",
+    "power_estimate": "150W+",
+    "hardware_recommendation": "High-end GPU (RTX 4090, A100)"
+  },
+  "metrics": {
+    "downloads": 1234567,
+    "likes": 890
+  },
+  "tags": ["llama", "text-generation", "pytorch"],
+  "created_at": "2023-07-18T00:00:00Z",
+  "url": "https://huggingface.co/meta-llama/Llama-2-7b"
 }
 ```
 
----
+## Response Formats
 
-## Thermal Cost Indicators
+### Thermal Levels
 
-The API automatically calculates thermal cost based on model characteristics:
+Models are categorized into four thermal levels:
 
-| Thermal Cost | Description | Examples |
-|--------------|-------------|----------|
-| **Low** 🟢 | Small, efficient models (<1B parameters) | TinyBERT, DistilBERT, MobileBERT |
-| **Medium** 🟡 | Moderate size models (1-3B parameters) | BERT-base, RoBERTa-base, GPT-2 |
-| **High** 🔴 | Large models requiring significant compute (3B+ parameters) | GPT-3, LLaMA, BLOOM |
+| Level | Indicator | Parameters | Power Estimate |
+|-------|-----------|------------|----------------|
+| cool | 🟢 | <1B | 5-10W |
+| warm | 🟡 | 1-3B | 10-50W |
+| moderate | 🟠 | 3-7B | 50-150W |
+| hot | 🔴 | 7B+ | 150W+ |
 
-## Error Responses
+### Error Responses
 
-The API uses standard HTTP status codes and returns errors in a consistent format:
+All errors follow a consistent format:
 
 ```json
 {
-  "detail": "Error message describing what went wrong"
+  "detail": "Error message",
+  "status_code": 400
 }
 ```
 
-### Common Status Codes
+**Common Error Codes**
 
 | Code | Description |
 |------|-------------|
-| 200 | Success |
-| 404 | Model not found |
-| 422 | Validation error (missing/invalid parameters) |
-| 500 | Internal server error |
+| 400 | Bad Request - Invalid parameters |
+| 404 | Not Found - Model not found |
+| 429 | Too Many Requests - Rate limited |
+| 500 | Internal Server Error |
 
 ## Rate Limiting
 
-Currently no rate limiting is implemented. In production, consider adding rate limits per IP or API key.
+- No rate limiting on the API itself
+- HuggingFace Hub may apply its own rate limits
+- Responses are cached for 5 minutes
 
-## CORS
-
-The API supports CORS for the following origins:
-- `http://localhost:8000` (Frontend development)
-- `http://localhost:3000` (Alternative frontend port)
-- `*` (All origins - for development only)
-
-## Interactive Documentation
-
-FastAPI provides automatic interactive documentation:
-
-- **Swagger UI**: http://localhost:8080/docs
-- **ReDoc**: http://localhost:8080/redoc
-
-## SDK Usage Examples
-
-### Python
+## Python Client Example
 
 ```python
-import requests
+import httpx
 
-# Search for models
-response = requests.get(
-    "http://localhost:8080/api/v1/search",
-    params={"q": "sentiment analysis", "limit": 5}
-)
-models = response.json()["models"]
+async def search_models(query: str, thermal: str = None):
+    async with httpx.AsyncClient() as client:
+        params = {"q": query}
+        if thermal:
+            params["thermal"] = thermal
+        
+        response = await client.get(
+            "http://localhost:8080/api/v1/search",
+            params=params
+        )
+        return response.json()
 
-# Get model details
-model_id = models[0]["modelId"]
-details = requests.get(f"http://localhost:8080/api/v1/models/{model_id}").json()
+# Usage
+results = await search_models("bert", thermal="cool")
 ```
 
-### JavaScript
+## JavaScript Client Example
 
 ```javascript
-// Search for models
-const response = await fetch(
-  "http://localhost:8080/api/v1/search?q=sentiment+analysis&limit=5"
-);
-const data = await response.json();
+async function searchModels(query, thermal) {
+    const params = new URLSearchParams({ q: query });
+    if (thermal) params.append('thermal', thermal);
+    
+    const response = await fetch(
+        `http://localhost:8080/api/v1/search?${params}`
+    );
+    return response.json();
+}
 
-// Get model details
-const modelId = data.models[0].modelId;
-const details = await fetch(
-  `http://localhost:8080/api/v1/models/${modelId}`
-).then(r => r.json());
+// Usage
+const results = await searchModels('bert', 'cool');
 ```
 
-## WebSocket Support (Future)
+## CLI Integration
 
-Future versions may include WebSocket support for real-time model updates and streaming search results.
+The API powers the Thermal Scout CLI:
+
+```bash
+# Search via CLI (uses API internally)
+thermal-scout search "llama" --thermal cool
+
+# Direct API call
+curl "http://localhost:8080/api/v1/search?q=llama&thermal=cool"
+```
+
+## Deployment
+
+### Running Locally
+
+```bash
+# Development
+uv run python run_api.py
+
+# Production
+uv run uvicorn thermal_scout.api.main:app --host 0.0.0.0 --port 8080
+```
+
+### Docker
+
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+COPY . .
+RUN pip install -e .
+CMD ["uvicorn", "thermal_scout.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| PORT | 8080 | API server port |
+| LOG_LEVEL | INFO | Logging level |
+| CACHE_TTL | 300 | Cache TTL in seconds |
+
+## OpenAPI Documentation
+
+Interactive API documentation is available at:
+
+- Swagger UI: `http://localhost:8080/docs`
+- ReDoc: `http://localhost:8080/redoc`
+- OpenAPI JSON: `http://localhost:8080/openapi.json`

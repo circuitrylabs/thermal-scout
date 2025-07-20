@@ -1,148 +1,212 @@
-# Thermal Scout 🔥
+<div align="center">
 
-A thermal-aware Hugging Face model search and exploration tool with CLI and API interfaces.
-
-## Features
-
-- 🔍 **Smart Search**: Find AI models on Hugging Face Hub
-- 🌡️ **Thermal Awareness**: Models sorted by computational efficiency (Low/Medium/High)
-- 🚀 **Fast API**: RESTful API built with FastAPI
-- 💻 **CLI Interface**: Beautiful terminal UI with Rich
-- 📊 **Model Insights**: Downloads, likes, and task information
-
-## Quick Start
-
-### Prerequisites
-
-- Python 3.12+
-- [uv](https://github.com/astral-sh/uv) package manager
-
-### Installation
-
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd thermal-scout
-
-# Install with uv
-uv sync
-
-# For development
-uv sync --extra dev
+```
+╔╦╗╦ ╦╔═╗╦═╗╔╦╗╔═╗╦    ╔═╗╔═╗╔═╗╦ ╦╔╦╗
+ ║ ╠═╣║╣ ╠╦╝║║║╠═╣║    ╚═╗║  ║ ║║ ║ ║ 
+ ╩ ╩ ╩╚═╝╩╚═╩ ╩╩ ╩╩═╝  ╚═╝╚═╝╚═╝╚═╝ ╩ 
 ```
 
-## Usage
+### 🔥 Find AI Models by Computational Temperature 🔥
 
-### 🖥️ CLI Interface
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?style=for-the-badge)](https://github.com/astral-sh/ruff)
+[![Powered by uv](https://img.shields.io/badge/powered%20by-uv-orange.svg?style=for-the-badge)](https://github.com/astral-sh/uv)
 
-```bash
-# Search with thermal awareness
-uv run thermal-scout search "sentiment analysis" --limit 5
+[**Web Demo**](https://thermal-scout.circuitrylabs.com) • [**Documentation**](docs/) • [**API Reference**](docs/API.md) • [**Contributing**](CONTRIBUTING.md)
 
-# Filter by model type
-uv run thermal-scout search "llama" --type text-generation
-
-# Disable thermal sorting
-uv run thermal-scout search "bert" --no-thermal
-```
-
-### 🌐 API Server
-
-Start the API server:
-
-```bash
-uv run python run_api.py
-```
-
-The API will be available at:
-- Base URL: http://localhost:8080
-- Interactive Docs: http://localhost:8080/docs
-- ReDoc: http://localhost:8080/redoc
-
-#### API Examples
-
-```bash
-# Search for models
-curl "http://localhost:8080/api/v1/search?q=sentiment+analysis&limit=5"
-
-# Get model details
-curl "http://localhost:8080/api/v1/models/distilbert-base-uncased"
-
-# Check health
-curl "http://localhost:8080/health"
-```
-
-## Thermal Cost Indicators
-
-Thermal Scout categorizes models based on their computational requirements:
-
-| Indicator | Thermal Cost | Description | Examples |
-|-----------|--------------|-------------|----------|
-| 🟢 | Low | <1B parameters, efficient models | DistilBERT, TinyBERT |
-| 🟡 | Medium | 1-3B parameters, moderate size | BERT-base, RoBERTa-base |
-| 🔴 | High | >3B parameters, large models | GPT-3, LLaMA-7B |
-
-## Documentation
-
-- 📖 [API Reference](docs/API.md) - Complete API documentation
-- 🛠️ [Local Development](docs/LOCAL_DEVELOPMENT.md) - Development setup guide
-- 🧪 [API Testing Guide](docs/API_TESTING.md) - Testing strategies and tools
-
-## Development
-
-### Running Tests
-
-```bash
-# Run all tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=thermal_scout
-
-# Run specific tests
-uv run pytest tests/test_api.py -v
-```
-
-### Code Quality
-
-```bash
-# Lint and format
-uv run ruff check --fix .
-uv run ruff format .
-
-# Type checking
-uv run mypy thermal_scout/
-```
-
-### Pre-commit Hooks
-
-```bash
-# Install hooks
-uv run pre-commit install
-
-# Run manually
-uv run pre-commit run --all-files
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Run tests and linting
-4. Commit your changes (`git commit -m 'Add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgments
-
-- 🚀 Built with [FastAPI](https://fastapi.tiangolo.com/) and [Typer](https://typer.tiangolo.com/)
-- 🤗 Powered by [Hugging Face Hub](https://huggingface.co/)
-- 🎨 Beautiful CLI with [Rich](https://rich.readthedocs.io/)
+</div>
 
 ---
 
-Made with ❤️ by Claude and Tyler for sustainable AI
+## ✨ What is Thermal Scout?
+
+Thermal Scout helps you find AI models based on their **computational "thermal" cost** - a visual indicator of how much compute resources a model requires. Search through **1M+ models** on HuggingFace Hub with thermal awareness!
+
+<div align="center">
+
+| 🟢 **Cool** | 🟡 **Warm** | 🟠 **Moderate** | 🔴 **Hot** |
+|:-----------:|:-----------:|:---------------:|:----------:|
+| <1B params  | 1-3B params | 3-7B params     | 7B+ params |
+| Edge devices| Workstations| ML rigs         | Data centers|
+
+</div>
+
+---
+
+## 🚀 Quick Start
+
+### 🌐 Web Interface
+
+```bash
+# Start local server
+python -m http.server 8000
+
+# Open in browser
+open http://localhost:8000
+```
+
+### 💻 Command Line
+
+```bash
+# Install
+uv pip install -e .
+
+# Search models
+thermal-scout search "llama" --limit 10
+```
+
+### 🔌 API Server
+
+```bash
+# Start API
+uv run python run_api.py
+
+# Interactive docs at http://localhost:8080/docs
+```
+
+---
+
+## 📦 Installation
+
+<details>
+<summary><b>Prerequisites</b></summary>
+
+- Python 3.12 or higher
+- UV package manager (optional but recommended)
+- Git
+
+</details>
+
+```bash
+# Clone the repository
+git clone https://github.com/circuitrylabs/thermal-scout.git
+cd thermal-scout
+
+# Install with uv (recommended)
+uv pip install -e .
+
+# Or with standard pip
+pip install -e .
+```
+
+---
+
+## 🎯 Features
+
+<div align="center">
+
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Smart Search** | Search 1M+ models on HuggingFace Hub |
+| 🌡️ **Thermal Indicators** | Visual computational cost at a glance |
+| 🖥️ **Three Interfaces** | Web UI, CLI, and REST API |
+| ⚡ **No API Key Required** | Direct HuggingFace Hub integration |
+| 🚀 **Lightning Fast** | Minimal dependencies, cached results |
+| 🎨 **Beautiful UI** | Clean, light-mode interface |
+
+</div>
+
+---
+
+## 🛠️ Development
+
+This project proudly uses the [**Astral**](https://astral.sh) toolchain:
+
+<div align="center">
+
+| Tool | Purpose | Command |
+|------|---------|---------|
+| ⚡ [**uv**](https://docs.astral.sh/uv/) | Fast package management | `uv sync` |
+| 🎨 [**ruff**](https://docs.astral.sh/ruff/) | Lightning-fast linting | `uv run ruff check .` |
+| 🔍 [**ty**](https://github.com/astral-sh/ty) | Blazing-fast type checker | `uv run ty` |
+
+</div>
+
+### Setup Development Environment
+
+```bash
+# Create virtual environment
+uv venv
+
+# Install all dependencies
+uv sync --extra dev
+
+# Run tests
+uv run pytest
+
+# Format code
+uv run ruff format .
+```
+
+---
+
+## 📁 Project Structure
+
+```
+thermal-scout/
+│
+├── 🌐 Frontend
+│   ├── index.html         # Single-page web app
+│   ├── app.js            # Frontend logic
+│   └── styles.css        # Clean, minimal styling
+│
+├── 🐍 Backend
+│   └── thermal_scout/    # Python package
+│       ├── cli.py       # Typer CLI interface
+│       ├── search.py    # Core search logic
+│       └── api/         # FastAPI endpoints
+│
+├── 🧪 Testing
+│   └── tests/           # Comprehensive test suite
+│
+└── 📚 Documentation
+    └── docs/           # User & API docs
+```
+
+---
+
+## 🤝 Contributing
+
+We love contributions! Check out our [**Contributing Guide**](CONTRIBUTING.md) to get started.
+
+<div align="center">
+
+```mermaid
+graph LR
+    A[Fork] --> B[Branch]
+    B --> C[Code]
+    C --> D[Test]
+    D --> E[PR]
+    E --> F[🎉]
+```
+
+</div>
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🔗 Links
+
+<div align="center">
+
+[**Documentation**](docs/) • [**Issues**](https://github.com/circuitrylabs/thermal-scout/issues) • [**Discussions**](https://github.com/circuitrylabs/thermal-scout/discussions)
+
+[**CircuitryLabs**](https://circuitrylabs.com) • [**HuggingFace**](https://huggingface.co)
+
+</div>
+
+---
+
+<div align="center">
+
+Made with ❤️ by [**CircuitryLabs**](https://circuitrylabs.com)
+
+*Choose models that match your computational resources!* 🔥
+
+</div>

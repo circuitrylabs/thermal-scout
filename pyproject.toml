@@ -8,14 +8,9 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "click>=8.2.1",
-    "datasets>=4.0.0",
     "huggingface-hub>=0.33.4",
-    "rich>=14.0.0",
-    "sentence-transformers>=5.0.0",
-    "torch>=2.7.1",
-    "transformers>=4.53.2",
     "typer>=0.16.0",
+    "rich>=14.0.0",
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
     "pydantic>=2.0.0",
